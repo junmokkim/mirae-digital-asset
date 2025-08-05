@@ -6,7 +6,7 @@ import openai
 
 # ----- 환경설정 -----
 FRED_API_KEY = '2f8671e0ca92ead96539311a2fb0d1fb'
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 openai.api_key = OPENAI_API_KEY
 
 # ----- FRED 시계열 -----
