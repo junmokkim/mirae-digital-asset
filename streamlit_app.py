@@ -222,35 +222,34 @@ selected_period = st.radio(
 # --- FRED 시리즈 정보(메타) 정의 ---
 fred_series_info = {
     'central_bank': [
-        {"id": "FEDFUNDS", "label": "Fed Funds Rate (%)", "title": "Fed 기준금리", "freq": "월간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1개월"]},
-        {"id": "WM2NS", "label": "M2 ($B)", "title": "M2 통화량($B)", "freq": "주간", "delta_periods": [90], "delta_direction": "normal", "delta_labels": ["3개월"]},
-        {"id": "RRPONTSYD", "label": "Fed RRP ($B)", "title": "Fed 역레포(RRP) 규모 (높을수록 시중 유동성 감소)", "freq": "일간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1개월"]},
+        {"id": "FEDFUNDS", "label": "Fed Funds Rate (%)", "title": "Fed 기준금리", "freq": "월간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1m"]},
+        {"id": "WM2NS", "label": "M2 ($B)", "title": "M2 통화량($B)", "freq": "주간", "delta_periods": [90], "delta_direction": "normal", "delta_labels": ["3m"]},
+        {"id": "RRPONTSYD", "label": "Fed RRP ($B)", "title": "Fed 역레포(RRP) 규모 (높을수록 시중 유동성 감소)", "freq": "일간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1m"]},
     ],
     'financial_inst': [
-        {"id": "DRTSCILM", "label": "Loan Standards (%)", "title": "SLOOS: 은행 대출 기준 (높을수록 대출 강화)", "freq": "분기별", "delta_periods": [90], "delta_direction": "inverse", "delta_labels": ["1분기"]},
-        {"id": "TOTALSL", "label": "Consumer Credit ($M)", "title": "미국 가계 소비자신용 잔액($M)", "freq": "월간", "delta_periods": [90], "delta_direction": "inverse", "delta_labels": ["3개월"]},
+        {"id": "DRTSCILM", "label": "Loan Standards (%)", "title": "SLOOS: 은행 대출 기준 (높을수록 대출 강화)", "freq": "분기별", "delta_periods": [90], "delta_direction": "inverse", "delta_labels": ["1q"]},
+        {"id": "TOTALSL", "label": "Consumer Credit ($M)", "title": "미국 가계 소비자신용 잔액($M)", "freq": "월간", "delta_periods": [90], "delta_direction": "inverse", "delta_labels": ["3m"]},
     ],
     'corporations': [
-        {"id": "BAMLC0A0CM", "label": "IG Spread (%)", "title": "투자등급(IG) 회사채 스프레드 (높을수록 리스크 증가)", "freq": "일간", "delta_periods": [30, 90], "delta_direction": "inverse", "delta_labels": ["1개월", "3개월"]},
-        {"id": "BAMLH0A0HYM2", "label": "HY Spread (%)", "title": "하이일드(HY) 회사채 스프레드 (높을수록 리스크 증가)", "freq": "일간", "delta_periods": [30, 90], "delta_direction": "inverse", "delta_labels": ["1개월", "3개월"]},
+        {"id": "BAMLC0A0CM", "label": "IG Spread (%)", "title": "투자등급(IG) 회사채 스프레드", "freq": "일간", "delta_periods": [30, 90], "delta_direction": "inverse", "delta_labels": ["1m", "3m"]},
+        {"id": "BAMLH0A0HYM2", "label": "HY Spread (%)", "title": "하이일드(HY) 회사채 스프레드", "freq": "일간", "delta_periods": [30, 90], "delta_direction": "inverse", "delta_labels": ["1m", "3m"]},
     ],
     'households': [
-        {"id": "CCLACBW027SBOG", "label": "Card Loan ($B)", "title": "상업은행 신용카드 대출 잔고($B)", "freq": "주간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1개월"]},
-        {"id": "CPIAUCSL", "label": "CPI YoY (%)", "title": "CPI(소비자물가지수) YoY", "freq": "월간", "delta_periods": [365], "delta_direction": "inverse", "delta_labels": ["1년"]},
+        {"id": "CCLACBW027SBOG", "label": "Card Loan ($B)", "title": "상업은행 신용카드 대출 잔고($B)", "freq": "주간", "delta_periods": [30], "delta_direction": "inverse", "delta_labels": ["1m"]},
+        {"id": "CPIAUCSL", "label": "CPI YoY (%)", "title": "CPI(소비자물가지수) YoY", "freq": "월간", "delta_periods": [365], "delta_direction": "inverse", "delta_labels": ["1y"]},
     ]
 }
 
-# --- Streamlit 컬럼 배치 (2x2) ---
-row1_col1, row1_col2 = st.columns(2)
-row2_col1, row2_col2 = st.columns(2)
+# [변경점] Streamlit 컬럼 배치를 2x2에서 1x4로 변경
+col1, col2, col3, col4 = st.columns(4)
 
-with row1_col1:
+with col1:
     st.markdown("<h2>🏛️ 연준 / 정책</h2>", unsafe_allow_html=True)
     for s in fred_series_info['central_bank']:
         df = get_fred_series(s["id"], s["label"])
         display_fred_chart(df, s["title"], s["label"], s["freq"], selected_period, s["delta_periods"], s["delta_direction"], s["delta_labels"])
 
-with row1_col2:
+with col2:
     st.markdown("<h2>🏦 금융기관</h2>", unsafe_allow_html=True)
     for s in fred_series_info['financial_inst']:
         df = get_fred_series(s["id"], s["label"])
@@ -265,10 +264,9 @@ with row1_col2:
     total_stablecoin_mcap_now = df_stablecoins_now['marketcap'].sum() if not df_stablecoins_now.empty else 0
 
     # 변화량(Delta) 계산 (증가시 빨강)
-    delta_1m_html = calculate_delta_html(df_stablecoins_hist, 'Total Market Cap ($B)', 30, 'inverse', '1개월')
-    delta_3m_html = calculate_delta_html(df_stablecoins_hist, 'Total Market Cap ($B)', 90, 'inverse', '3개월')
-    delta_htmls = [delta_1m_html, delta_3m_html]
-    delta_html_joined = "".join(delta_htmls)
+    delta_1m_html = calculate_delta_html(df_stablecoins_hist, 'Total Market Cap ($B)', 30, 'inverse', '1m')
+    delta_3m_html = calculate_delta_html(df_stablecoins_hist, 'Total Market Cap ($B)', 90, 'inverse', '3m')
+    delta_html_joined = "".join([delta_1m_html, delta_3m_html])
 
     # 스테이블코인 metric 표시
     st.markdown(f"""
@@ -294,8 +292,36 @@ with row1_col2:
             "<div class='chart-date-info' style='margin-top:-5px;'>출처: <b>DefiLlama</b> (실시간)</div>",
             unsafe_allow_html=True
         )
+
+    # M2 대비 스테이블코인 시총 시계열 차트
+    df_m2 = get_fred_series("WM2NS", "M2 ($B)")
+    df_m2_vs_stable = pd.DataFrame()
+
+    if not df_stablecoins_hist.empty and not df_m2.empty:
+        df_merged = pd.merge_asof(df_stablecoins_hist.sort_values('Date'), 
+                                  df_m2.sort_values('Date'), 
+                                  on='Date')
+        df_merged.dropna(inplace=True)
+        
+        if 'Total Market Cap ($B)' in df_merged and 'M2 ($B)' in df_merged:
+            new_col_name = 'Stablecoin Mcap as % of M2 (%)'
+            df_merged[new_col_name] = (df_merged['Total Market Cap ($B)'] / df_merged['M2 ($B)']) * 100
+            df_m2_vs_stable = df_merged[['Date', new_col_name]].copy()
+
+    if not df_m2_vs_stable.empty:
+        display_fred_chart(
+            df=df_m2_vs_stable,
+            title="스테이블코인 시총 / M2 통화량",
+            column_name='Stablecoin Mcap as % of M2 (%)',
+            freq="주간 (M2 기준)",
+            selected_period=selected_period,
+            delta_periods=[90, 365],
+            delta_direction='normal',
+            delta_labels=['3m', '1y']
+        )
+    else:
+        st.warning("M2 대비 스테이블코인 시총 데이터를 표시할 수 없습니다.")
     
-    # 스테이블코인 주요 준비금 관련 정보(Expander)
     with st.expander("주요 스테이블코인 준비금 정보 (Tether, Circle)"):
         st.info("Tether와 Circle은 실시간 준비금 API를 제공하지 않으며, 정기적인 감사/증명 보고서를 통해 투명성을 공개합니다.")
         st.markdown("""
@@ -303,13 +329,13 @@ with row1_col2:
         - **Circle (USDC) 투명성 보고서:** [https://www.circle.com/en/transparency](https://www.circle.com/en/transparency)
         """)
 
-with row2_col1:
+with col3:
     st.markdown("<h2>🏢 기업</h2>", unsafe_allow_html=True)
     for s in fred_series_info['corporations']:
         df = get_fred_series(s["id"], s["label"])
         display_fred_chart(df, s["title"], s["label"], s["freq"], selected_period, s["delta_periods"], s["delta_direction"], s["delta_labels"])
 
-with row2_col2:
+with col4:
     st.markdown("<h2>👨‍👩‍👧‍👦 가계 (소비자)</h2>", unsafe_allow_html=True)
     for s in fred_series_info['households']:
         df = get_fred_series(s["id"], s["label"])
