@@ -245,7 +245,7 @@ row1_col1, row1_col2 = st.columns(2)
 row2_col1, row2_col2 = st.columns(2)
 
 with row1_col1:
-    st.markdown("<h2>🏦 연준 / 정책</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>🏛️ 연준 / 정책</h2>", unsafe_allow_html=True)
     for s in fred_series_info['central_bank']:
         df = get_fred_series(s["id"], s["label"])
         display_fred_chart(df, s["title"], s["label"], s["freq"], selected_period, s["delta_periods"], s["delta_direction"], s["delta_labels"])
